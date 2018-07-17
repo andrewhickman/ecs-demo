@@ -117,24 +117,23 @@ impl<'a> System<'a> for CollisionSystem {
     }
 }
 
-pub struct ScoreSystem;
+pub struct DeleteSystem;
 
-impl ScoreSystem {
+impl DeleteSystem {
     pub const NAME: &'static str = "Score";
 }
 
-impl<'a> System<'a> for ScoreSystem {
+impl<'a> System<'a> for DeleteSystem {
     type SystemData = (
+        Entities<'a>,
         WriteStorage<'a, Position>,
-        WriteStorage<'a, Velocity>,
         ReadStorage<'a, Ball>,
     );
 
-    fn run(&mut self, (mut positions, mut velocities, balls): Self::SystemData) {
-        for (pos, vel, _) in (&mut positions, &mut velocities, &balls).join() {
+    fn run(&mut self, (entities, mut positions, balls): Self::SystemData) {
+        for (ent, pos, _) in (&*entities, &mut positions, &balls).join() {
             if pos.0.x == 0.0 || pos.0.x == ARENA_SIZE.width as f32 {
-                *pos = Position::centre();
-                *vel = Velocity::random();
+                entities.delete(ent).unwrap();
             }
         }
     }

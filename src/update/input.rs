@@ -1,7 +1,9 @@
+use rand::distributions::Poisson;
+use rand::{self, Rng};
 use shrev::{EventChannel, ReaderId};
 use specs::prelude::*;
 
-use update::physics::{Paddle, Velocity};
+use update::physics::{Ball, Paddle, Position, Velocity};
 use winit::{ElementState, Event, KeyboardInput, VirtualKeyCode, WindowEvent};
 
 pub struct Binding {
@@ -52,21 +54,37 @@ impl Axis {
 }
 
 pub struct InputSystem {
-    pub event_rx: ReaderId<Event>,
+    event_rx: ReaderId<Event>,
+    dist: Poisson,
 }
 
 impl InputSystem {
     pub const NAME: &'static str = "Input";
+
+    pub fn new(world: &mut World) -> Self {
+        InputSystem {
+            event_rx: world
+                .write_resource::<EventChannel<Event>>()
+                .register_reader(),
+            dist: Poisson::new(4.0),
+        }
+    }
 }
 
 impl<'a> System<'a> for InputSystem {
     type SystemData = (
+        Entities<'a>,
+        WriteStorage<'a, Position>,
         WriteStorage<'a, Velocity>,
+        WriteStorage<'a, Ball>,
         WriteStorage<'a, Axis>,
         ReadExpect<'a, EventChannel<Event>>,
     );
 
-    fn run(&mut self, (mut velocities, mut axis, event_tx): Self::SystemData) {
+    fn run(
+        &mut self,
+        (entities, mut positions, mut velocities, mut balls, mut axis, event_tx): Self::SystemData,
+    ) {
         for event in event_tx.read(&mut self.event_rx) {
             let input = match event {
                 Event::WindowEvent {
@@ -76,9 +94,21 @@ impl<'a> System<'a> for InputSystem {
                 _ => continue,
             };
 
-            for (vel, ax) in (&mut velocities, &mut axis).join() {
-                if let Some(sign) = ax.update(*input) {
-                    vel.set_y(sign * Paddle::SPEED);
+            if input.virtual_keycode == Some(VirtualKeyCode::Space)
+                && input.state == ElementState::Released
+            {
+                let radius = rand::thread_rng().sample(&self.dist) as f32;
+                entities
+                    .build_entity()
+                    .with(Position::centre(), &mut positions)
+                    .with(Velocity::random(), &mut velocities)
+                    .with(Ball { radius }, &mut balls)
+                    .build();
+            } else {
+                for (vel, ax) in (&mut velocities, &mut axis).join() {
+                    if let Some(sign) = ax.update(*input) {
+                        vel.set_y(sign * Paddle::SPEED);
+                    }
                 }
             }
         }

@@ -1,4 +1,5 @@
 use std::fmt::{self, Display};
+use std::io::Write;
 use std::str;
 
 use console::Term;
@@ -24,6 +25,15 @@ impl PrintSystem {
     }
 }
 
+impl PrintSystem {
+    fn print(&mut self, line: &str, (rows, cols): (u16, u16)) {
+        if self.pos <= rows as usize {
+            writeln!(self.term, "{:.1$}", line, cols as usize).unwrap_or_else(throw);
+            self.pos += 1;
+        }
+    }
+}
+
 impl<'a> System<'a> for PrintSystem {
     type SystemData = (
         Entities<'a>,
@@ -42,57 +52,66 @@ impl<'a> System<'a> for PrintSystem {
         const COLUMN_4: usize = 20;
         const COLUMN_5: usize = 80;
 
+        let size = self.term.size();
+
         self.term.clear_last_lines(self.pos).unwrap_or_else(throw);
         self.pos = 0;
 
-        println!(
-            "{}┃{}│{}│{}│{}│{}",
-            str::repeat(" ", COLUMN_0),
-            fmt_header("Position", COLUMN_1),
-            fmt_header("Velocity", COLUMN_2),
-            fmt_header("Paddle", COLUMN_3),
-            fmt_header("Ball", COLUMN_4),
-            fmt_header("Keybind", COLUMN_5)
+        self.print(
+            &format!(
+                "{}┃{}│{}│{}│{}│{}",
+                str::repeat(" ", COLUMN_0),
+                fmt_header("Position", COLUMN_1),
+                fmt_header("Velocity", COLUMN_2),
+                fmt_header("Paddle", COLUMN_3),
+                fmt_header("Ball", COLUMN_4),
+                fmt_header("Keybind", COLUMN_5)
+            ),
+            size,
         );
-        self.pos += 1;
-        println!(
-            "{}╋{}┿{}┿{}┿{}┿{}",
-            str::repeat("━", COLUMN_0),
-            str::repeat("━", COLUMN_1),
-            str::repeat("━", COLUMN_2),
-            str::repeat("━", COLUMN_3),
-            str::repeat("━", COLUMN_4),
-            str::repeat("━", COLUMN_5)
+        self.print(
+            &format!(
+                "{}╋{}┿{}┿{}┿{}┿{}",
+                str::repeat("━", COLUMN_0),
+                str::repeat("━", COLUMN_1),
+                str::repeat("━", COLUMN_2),
+                str::repeat("━", COLUMN_3),
+                str::repeat("━", COLUMN_4),
+                str::repeat("━", COLUMN_5)
+            ),
+            size,
         );
-        self.pos += 1;
         let mut first = true;
         for ent in (&*entities).join() {
             if !first {
-                println!(
-                    "{}╂{}┼{}┼{}┼{}┼{}",
-                    str::repeat("─", COLUMN_0),
-                    str::repeat("─", COLUMN_1),
-                    str::repeat("─", COLUMN_2),
-                    str::repeat("─", COLUMN_3),
-                    str::repeat("─", COLUMN_4),
-                    str::repeat("─", COLUMN_5),
+                self.print(
+                    &format!(
+                        "{}╂{}┼{}┼{}┼{}┼{}",
+                        str::repeat("─", COLUMN_0),
+                        str::repeat("─", COLUMN_1),
+                        str::repeat("─", COLUMN_2),
+                        str::repeat("─", COLUMN_3),
+                        str::repeat("─", COLUMN_4),
+                        str::repeat("─", COLUMN_5),
+                    ),
+                    size,
                 );
-                self.pos += 1;
             }
-            println!(
-                "{}┃{}│{}│{}│{}│{}",
-                fmt_value(Some(&ent.id()), COLUMN_0),
-                fmt_value(positions.get(ent), COLUMN_1),
-                fmt_value(velocities.get(ent), COLUMN_2),
-                fmt_value(paddles.get(ent), COLUMN_3),
-                fmt_value(balls.get(ent), COLUMN_4),
-                fmt_value(axis.get(ent), COLUMN_5),
+            self.print(
+                &format!(
+                    "{}┃{}│{}│{}│{}│{}",
+                    fmt_value(Some(&ent.id()), COLUMN_0),
+                    fmt_value(positions.get(ent), COLUMN_1),
+                    fmt_value(velocities.get(ent), COLUMN_2),
+                    fmt_value(paddles.get(ent), COLUMN_3),
+                    fmt_value(balls.get(ent), COLUMN_4),
+                    fmt_value(axis.get(ent), COLUMN_5),
+                ),
+                size,
             );
             first = false;
-            self.pos += 1;
         }
-        println!();
-        self.pos += 1;
+        self.print("", size);
     }
 }
 

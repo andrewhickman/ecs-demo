@@ -3,7 +3,6 @@ pub mod physics;
 mod input;
 mod print;
 
-use shrev::EventChannel;
 use specs::prelude::*;
 use winit::VirtualKeyCode as KeyCode;
 
@@ -38,26 +37,13 @@ pub fn init(world: &mut World, dispatcher: &mut DispatcherBuilder) {
         .with(Axis::new(KeyCode::L, KeyCode::O))
         .build();
 
-    world
-        .create_entity()
-        .with(Position::centre())
-        .with(Velocity::random())
-        .with(Ball { radius: 20.0 })
-        .build();
-
-    //    dispatcher.add(PrintSystem::new(), PrintSystem::NAME, &[]);
-    dispatcher.add(
-        InputSystem {
-            event_rx: world.write_resource::<EventChannel<_>>().register_reader(),
-        },
-        InputSystem::NAME,
-        &[],
-    );
+    dispatcher.add(PrintSystem::new(), PrintSystem::NAME, &[]);
+    dispatcher.add(InputSystem::new(world), InputSystem::NAME, &[]);
     dispatcher.add(PhysicsSystem, PhysicsSystem::NAME, &[InputSystem::NAME]);
     dispatcher.add(
         CollisionSystem,
         CollisionSystem::NAME,
         &[PhysicsSystem::NAME],
     );
-    dispatcher.add(ScoreSystem, ScoreSystem::NAME, &[CollisionSystem::NAME]);
+    dispatcher.add(DeleteSystem, DeleteSystem::NAME, &[CollisionSystem::NAME]);
 }

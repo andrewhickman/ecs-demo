@@ -495,7 +495,7 @@ dependencies = [
 [[package]]
 name = "lime-main-loop"
 version = "0.1.0"
-source = "git+https://github.com/andrewhickman/lime#e2dc4532f799d9ecc8c5b99f943d6f0863aa5cd5"
+source = "git+https://github.com/andrewhickman/lime#8d8e2b9d776adc86c199a407a012d6309df46416"
 dependencies = [
  "failure 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -505,7 +505,7 @@ dependencies = [
 [[package]]
 name = "lime-render"
 version = "0.1.0"
-source = "git+https://github.com/andrewhickman/lime#e2dc4532f799d9ecc8c5b99f943d6f0863aa5cd5"
+source = "git+https://github.com/andrewhickman/lime#8d8e2b9d776adc86c199a407a012d6309df46416"
 dependencies = [
  "approx 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -524,7 +524,7 @@ dependencies = [
 [[package]]
 name = "lime-utils"
 version = "0.1.0"
-source = "git+https://github.com/andrewhickman/lime#e2dc4532f799d9ecc8c5b99f943d6f0863aa5cd5"
+source = "git+https://github.com/andrewhickman/lime#8d8e2b9d776adc86c199a407a012d6309df46416"
 dependencies = [
  "backtrace 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "failure 0.1.1 (registry+https://github.com/rust-lang/crates.io-index)",

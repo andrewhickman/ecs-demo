@@ -51,14 +51,13 @@ impl main_loop::App for App {
     const UPDATES_PER_SECOND: u32 = 20;
     const RENDERS_PER_SECOND: u32 = 60;
 
-    fn update(&mut self, dt: Duration) {
+    fn update(&mut self, _: Duration) {
         self.update.dispatch(&self.world.res);
-        println!("updating {:?}", dt);
+        self.world.maintain();
     }
 
-    fn render(&mut self, dt: Duration) {
+    fn render(&mut self, _: Duration) {
         self.render.dispatch(&self.world.res);
-        println!("rendering {:?}", dt);
     }
 
     fn event(&mut self, event: Event) -> ControlFlow {
